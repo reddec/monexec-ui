@@ -66,9 +66,9 @@
                 const {config} = this.get();
                 return fetch('../instance/' + encodeURIComponent(config.Name), {
                     method: 'get',
-                }).then((r) => r.json()).then(function (reply) {
+                }).then((r) => r.json()).then((reply) => {
                     this.set({running: reply.running});
-                }).catch(function (err) {
+                }).catch((err) => {
                     console.error(config.Name, err);
                 })
             },
@@ -78,13 +78,13 @@
                 this.set({running: null});
                 return fetch('../supervisor/' + encodeURIComponent(config.Name), {
                     method: 'post',
-                }).then(function (r) {
+                }).then((r) => {
                     if (r.status !== 200) {
                         console.warn(r.status, r.statusText)
                     } else {
                         return this.fetchState();
                     }
-                }).catch(function (err) {
+                }).catch((err) => {
                     console.error(config.Name, err);
                 })
             },
@@ -94,13 +94,13 @@
                 this.set({running: null});
                 return fetch('../instance/' + encodeURIComponent(config.Name), {
                     method: 'post',
-                }).then(function (r) {
+                }).then((r) => {
                     if (r.status !== 204) {
                         console.warn(r.status, r.statusText)
                     } else {
                         return this.fetchState();
                     }
-                }).catch(function (err) {
+                }).catch((err) => {
                     console.error(config.Name, err);
                 })
             }
