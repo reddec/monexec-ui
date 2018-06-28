@@ -64,7 +64,7 @@
         methods: {
             fetchState() {
                 const {config} = this.get();
-                return fetch('instance/' + encodeURIComponent(config.Name), {
+                return fetch('../instance/' + encodeURIComponent(config.Name), {
                     method: 'get',
                 }).then(function (r) {
                     if (r.status !== 200) {
@@ -82,7 +82,7 @@
                 const {running, config} = this.get();
                 if (running) return;
                 this.set({running: null});
-                return fetch('supervisor/' + encodeURIComponent(config.Name), {
+                return fetch('../supervisor/' + encodeURIComponent(config.Name), {
                     method: 'post',
                 }).then(function (r) {
                     if (r.status !== 200) {
@@ -98,7 +98,7 @@
                 const {running, config} = this.get();
                 if (!running) return;
                 this.set({running: null});
-                return fetch('instance/' + encodeURIComponent(config.Name), {
+                return fetch('../instance/' + encodeURIComponent(config.Name), {
                     method: 'post',
                 }).then(function (r) {
                     if (r.status !== 204) {
