@@ -1,0 +1,225 @@
+<div class="content">
+    <div style="display: flex;flex-direction: row;">
+        {#if running === null}
+        <div class="circle bg-grey blinking"></div>
+        {:elseif running}
+        <div class="circle bg-green"></div>
+        {:else}
+        <div class="circle bg-red"></div>
+        {/if}
+        <h1 style="margin: 0">
+            {config.Name}
+        </h1>
+    </div>
+    <div>
+        {#if running === null}
+        <button class="nicebtn" disabled>checking...</button>
+        {:elseif running}
+        <button class="nicebtn" on:click="stop()">stop</button>
+        {:else}
+        <button class="nicebtn" on:click="start()">start</button>
+        {/if}
+    </div>
+    <div class="mainblock">
+        <div class="run">
+            <pre style="margin: 0"><span>cmd:</span> {config.Command} {config.Args.join(' ')}</pre>
+            {#if config.WorkDir}
+            <div style="font-style: italic; font-family: monospace;color: gray; border-top: lightgray dotted 1px; padding-top: 0.5em; padding-left: 8px; padding-right: 8px; margin-top: 0.5em;  margin-left: -8px; margin-right: -8px">
+                &nbsp;at: {config.WorkDir}
+            </div>
+            {/if}
+            {#if config.LogFile}
+            <div style="font-style: italic; font-family: monospace;color: gray; border-top: lightgray dotted 1px; padding-top: 0.5em; padding-left: 8px; padding-right: 8px; margin-top: 0.5em;  margin-left: -8px; margin-right: -8px">
+                log: <a href="supervisor/{config.Name}/log">{config.LogFile}</a>
+            </div>
+            {/if}
+        </div>
+    </div>
+    {#if config.Environment}
+    <table class="env">
+        {#each Object.entries(config.Environment) as [name, value]}
+        <tr>
+            <th>{name}</th>
+            <td style="word-break: break-all">
+                {value}
+            </td>
+        </tr>
+        {/each}
+    </table>
+    {/if}
+
+    <div class="bottom-panel">
+        <span class="green rborder">restart: {config.Restart===-1 ? '∞' : config.Restart}</span>
+        <span class="blue rborder">restart timeout: {(config.RestartTimeout/1000000000).toFixed(2)}s</span>
+        <span class="orange">stop timeout: {(config.StopTimeout/1000000000).toFixed(2)}s</span>
+    </div>
+</div>
+<script>
+    export default {
+        data() {
+            return {
+                running: null
+            }
+        },
+        methods: {
+            fetchState() {
+                const {config} = this.get();
+                return fetch('instance/' + encodeURIComponent(config.Name), {
+                    method: 'get',
+                }).then(function (r) {
+                    if (r.status !== 200) {
+                        console.warn(r.status, r.statusText)
+                    } else {
+                        const reply = JSON.parse(r.body);
+                        this.set({running: reply.running});
+                    }
+
+                }).catch(function (err) {
+                    console.error(config.Name, err);
+                })
+            },
+            start() {
+                const {running, config} = this.get();
+                if (running) return;
+                this.set({running: null});
+                return fetch('supervisor/' + encodeURIComponent(config.Name), {
+                    method: 'post',
+                }).then(function (r) {
+                    if (r.status !== 200) {
+                        console.warn(r.status, r.statusText)
+                    } else {
+                        return this.fetchState();
+                    }
+                }).catch(function (err) {
+                    console.error(config.Name, err);
+                })
+            },
+            stop() {
+                const {running, config} = this.get();
+                if (!running) return;
+                this.set({running: null});
+                return fetch('instance/' + encodeURIComponent(config.Name), {
+                    method: 'post',
+                }).then(function (r) {
+                    if (r.status !== 204) {
+                        console.warn(r.status, r.statusText)
+                    } else {
+                        return this.fetchState();
+                    }
+                }).catch(function (err) {
+                    console.error(config.Name, err);
+                })
+            }
+        },
+        oncreate(ctx) {
+            this.interval = setInterval(() => {
+                this.set({running: true})
+            }, 2000);
+        },
+        ondestroy() {
+            clearInterval(this.interval);
+        }
+    }
+</script>
+<style type="text/css">
+    .green {
+        color: green;
+    }
+
+    .orange {
+        color: red;
+    }
+
+    .blue {
+        color: blue;
+    }
+
+    .bg-green {
+        background-color: limegreen;
+    }
+
+    .bg-red {
+        background-color: red;
+    }
+
+    .bg-grey {
+        background-color: lightgray;
+    }
+
+    .circle {
+        display: inline-block;
+        width: 2em;
+        height: 2em;
+        border-radius: 1em;
+        margin: 0.2em;
+    }
+
+    .run {
+        width: 100%;
+        padding: 8px;
+        border-radius: 5px;
+    }
+
+    .nicebtn {
+        background: none;
+        border-radius: 3px;
+        border: gray dashed 1px;
+        margin: 5px;
+        font-size: 18px;
+    }
+
+    .nicebtn:hover {
+        background: grey;
+        color: white;
+        border-color: white;
+        font-size: 18px;
+    }
+
+    .mainblock {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .rborder {
+        border-right: darkgray dashed 1px;
+        padding-right: 1em;
+    }
+
+    .env {
+        width: 100%;
+        text-align: left;
+        font-family: monospace;
+    }
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        box-shadow: darkgrey 0 0 3px;
+        border-radius: 5px;
+        padding: 8px;
+        font-family: Roboto serif;
+        border: lightgray 1px solid;
+        margin: 10px;
+    }
+
+    .bottom-panel {
+        background-color: lightgray;
+        margin-left: -8px;
+        margin-right: -8px;
+        margin-bottom: -8px;
+        padding: 5px;
+        font-family: monospace;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+    }
+
+    .blinking {
+        animation: blinking 2s linear infinite;
+    }
+
+    @keyframes blinking {
+        50% {
+            opacity: 0;
+        }
+    }
+</style>

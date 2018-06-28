@@ -1,0 +1,30 @@
+{
+  "name": "monexec-ui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "webpack-dev-server",
+    "build": "webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reddec/monexec-ui.git"
+  },
+  "author": "Baryshnikov Alexander <owner@reddec.net>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/reddec/monexec-ui/issues"
+  },
+  "homepage": "https://github.com/reddec/monexec-ui#readme",
+  "devDependencies": {
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.2.0",
+    "svelte": "^2.8.1",
+    "svelte-loader": "^2.9.1",
+    "webpack": "^4.12.2",
+    "webpack-cli": "^3.0.8",
+    "webpack-dev-server": "^3.1.4"
+  }
+}
