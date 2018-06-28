@@ -66,14 +66,8 @@
                 const {config} = this.get();
                 return fetch('../instance/' + encodeURIComponent(config.Name), {
                     method: 'get',
-                }).then(function (r) {
-                    if (r.status !== 200) {
-                        console.warn(r.status, r.statusText)
-                    } else {
-                        const reply = JSON.parse(r.body);
-                        this.set({running: reply.running});
-                    }
-
+                }).then((r) => r.json()).then(function (reply) {
+                    this.set({running: reply.running});
                 }).catch(function (err) {
                     console.error(config.Name, err);
                 })
