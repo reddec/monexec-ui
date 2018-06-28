@@ -113,7 +113,7 @@
                     })
                 }, 2000);
             };
-            this.fetchState().then(fn);
+            this.fetchState().then(() => fn());
         },
         ondestroy() {
             clearTimeout(this.timeout);
