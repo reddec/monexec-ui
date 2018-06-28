@@ -106,12 +106,17 @@
             }
         },
         oncreate(ctx) {
-            this.interval = setInterval(() => {
-                this.set({running: true})
-            }, 2000);
+            let fn = () => {
+                this.timeout = setTimeout(() => {
+                    this.fetchState().finally(() => {
+                        fn();
+                    })
+                }, 2000);
+            };
+            this.fetchState().then(fn);
         },
         ondestroy() {
-            clearInterval(this.interval);
+            clearTimeout(this.timeout);
         }
     }
 </script>
