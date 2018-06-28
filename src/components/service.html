@@ -66,7 +66,12 @@
                 const {config} = this.get();
                 return fetch('../instance/' + encodeURIComponent(config.Name), {
                     method: 'get',
-                }).then((r) => r.json()).then((reply) => {
+                }).then((r) => {
+                    if (r.status === 404) {
+                        return {"running": false}
+                    }
+                    return r.json()
+                }).then((reply) => {
                     this.set({running: reply.running});
                 }).catch((err) => {
                     console.error(config.Name, err);
