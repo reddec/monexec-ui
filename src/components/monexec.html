@@ -2,7 +2,7 @@
 <p>loading...</p>
 {:then configs}
 {#each configs as config}
-<Service config="{config}"/>
+<Service config="{config}" base-url="{baseURL}"/>
 {/each}
 {/await}
 
@@ -10,24 +10,33 @@
 
     import Service from './service.html';
 
+    const defaultBaseURL = (process.env.API || '..');
+
     export default {
         components: {
             Service
         },
+        oncreate() {
+            const {baseURL = defaultBaseURL} = this.get();
+            return fetch(`${baseURL}/supervisors`, {
+                method: 'get',
+            }).then((r) => r.json()).then((r) => Promise.all(r.map((name) => {
+                    return fetch(`${baseURL}/supervisor/` + encodeURIComponent(name), {
+                        method: 'get',
+                    }).then((data) => {
+                        return data.json();
+                    })
+                }))
+            ).then((data) => {
+                this.set({configs: data});
+            }).catch(function (err) {
+                console.error(err);
+            })
+
+        },
         data() {
             return {
-                configs: fetch('../supervisors', {
-                    method: 'get',
-                }).then((r) => r.json()).then((r) => Promise.all(r.map((name) => {
-                        return fetch('../supervisor/' + encodeURIComponent(name), {
-                            method: 'get',
-                        }).then((data) => {
-                            return data.json();
-                        })
-                    }))
-                ).catch(function (err) {
-                    console.error(err);
-                })
+                configs: []
             }
         }
     }
