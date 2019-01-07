@@ -30,7 +30,7 @@
             {/if}
             {#if config.LogFile}
             <div style="font-style: italic; font-family: monospace;color: gray; border-top: lightgray dotted 1px; padding-top: 0.5em; padding-left: 8px; padding-right: 8px; margin-top: 0.5em;  margin-left: -8px; margin-right: -8px">
-                log: <a href="../supervisor/{config.Name}/log">{config.LogFile}</a>
+                log: <a href="{baseAPI}/supervisor/{config.Name}/log">{config.LogFile}</a>
             </div>
             {/if}
         </div>
@@ -124,6 +124,9 @@
         },
         ondestroy() {
             clearTimeout(this.timeout);
+        },
+        computed: {
+            baseAPI: ({baseURL = defaultBaseURL}) => baseURL,
         }
     }
 </script>
