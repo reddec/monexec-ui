@@ -2,7 +2,7 @@
 <p>loading...</p>
 {:then configs}
 {#each configs as config}
-<Service config="{config}"/>
+<Service config="{config}" base="{base}" on:clicked="onItemSelected(config)" detailed="{selected == config}"/>
 {/each}
 {/await}
 
@@ -15,19 +15,33 @@
             Service
         },
         data() {
+
             return {
-                configs: fetch('../supervisors', {
-                    method: 'get',
-                }).then((r) => r.json()).then((r) => Promise.all(r.map((name) => {
-                        return fetch('../supervisor/' + encodeURIComponent(name), {
-                            method: 'get',
-                        }).then((data) => {
-                            return data.json();
-                        })
-                    }))
-                ).catch(function (err) {
-                    console.error(err);
-                })
+                configs: [],
+                base: '..',
+                selected: null
+            }
+        },
+        oncreate() {
+            const {base} = this.get();
+            fetch(`${base}/supervisors`, {
+                method: 'get',
+            }).then((r) => r.json()).then((r) => Promise.all(r.map((name) => {
+                    return fetch(`${base}/supervisor/` + encodeURIComponent(name), {
+                        method: 'get',
+                    }).then((data) => {
+                        return data.json();
+                    })
+                }))
+            ).then((configs) => {
+                this.set({configs: configs});
+            }).catch(function (err) {
+                console.error(err);
+            })
+        },
+        methods: {
+            onItemSelected(item) {
+                this.set({selected:item})
             }
         }
     }
